@@ -62,6 +62,7 @@ struct ScanFoodView: View {
                 ImagePickerView(source: .photoLibrary, onImagePicked: handleImage, onCancel: { showPhotoLibrary = false })
             }
             .navigationDestination(isPresented: $showResults) {
+                //MealAnalysisViewPrototype(items: analyzedItems, image: capturedImage, onLogMeal: nil)
                 MealAnalysisView(items: analyzedItems, image: capturedImage, onLogMeal: nil)
             }
         }
