@@ -6,13 +6,18 @@
 //  use these buttons to confirm or quick-log from the wrist.
 //
 
+
+
+
 import SwiftUI
 import WatchConnectivity
 
 struct WatchContentView: View {
     @State private var glucoseValue = ""
     @State private var status = ""
-    @State private var session: WCSession?
+    @State private var sugarAlert: SugarAlert?
+    
+    private let connectivityManager = WatchConnectivityManager.shared
 
     var body: some View {
         List {
@@ -20,12 +25,15 @@ struct WatchContentView: View {
                 HStack {
                     TextField("Glucose", text: $glucoseValue)
                     Button("Log") { logGlucose() }
+                        .disabled(glucoseValue.isEmpty)
                 }
             }
+
             Section("Confirm") {
                 Button("Confirm medication") { sendConfirmMedication() }
                 Button("Confirm glucose check") { sendConfirmGlucose() }
             }
+
             if !status.isEmpty {
                 Section {
                     Text(status)
@@ -35,14 +43,18 @@ struct WatchContentView: View {
             }
         }
         .navigationTitle("SugarScope")
-        .onAppear {
-            if WCSession.isSupported() {
-                let s = WCSession.default
-                s.activate()
-                session = s
+        .sheet(item: $sugarAlert) { alert in
+            SugarAlertView(alert: alert)
+        }
+        .onReceive(connectivityManager.objectWillChange) { _ in
+            if let alert = connectivityManager.currentAlert {
+                sugarAlert = alert
+                connectivityManager.currentAlert = nil // Limpiar después de mostrar
             }
         }
     }
+
+    // MARK: - Actions
 
     private func logGlucose() {
         guard let v = Double(glucoseValue), v > 0 else {
@@ -65,10 +77,14 @@ struct WatchContentView: View {
     }
 
     private func send(_ dict: [String: Any]) {
-        guard let s = session, s.isReachable else {
+        guard WCSession.default.isReachable else {
             status = "Phone not reachable"
             return
         }
-        s.sendMessage(dict, replyHandler: { _ in }, errorHandler: { _ in status = "Send failed" })
+        WCSession.default.sendMessage(dict, replyHandler: nil) { error in
+            DispatchQueue.main.async {
+                status = "Send failed: \(error.localizedDescription)"
+            }
+        }
     }
 }

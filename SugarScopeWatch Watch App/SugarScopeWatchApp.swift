@@ -10,6 +10,11 @@ import SwiftUI
 
 @main
 struct SugarScopeWatchApp: App {
+    init() {
+            _ = WatchConnectivityManager.shared
+            // Solicitar permisos de notificación al iniciar
+            NotificationManager.shared.requestAuthorization()
+        }
     var body: some Scene {
         WindowGroup {
             WatchContentView()
