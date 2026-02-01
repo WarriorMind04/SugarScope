@@ -434,9 +434,9 @@ enum AnalyzerType: String, CaseIterable, Identifiable {
     var description: String {
         switch self {
         case .mlModel:
-            return "Custom diabetes-focused model with USDA nutrition"
+            return "Custom diabetes-focused model created with createML"
         case .usdaAPI:
-            return "Apple Vision + USDA database (requires internet)"
+            return "API USDA database model (requires internet)"
         }
     }
 }
