@@ -18,10 +18,10 @@ struct ScanFoodView: View {
     @State private var showResults = false
 
     //Here we can use the ML model of Apple
-    //private let analyzer = FoodAnalyzerML()
+    private let analyzer = FoodAnalyzerML()
     
     //Here we can use the API
-    private let analyzer = FoodAnalyzer()
+    //private let analyzer = FoodAnalyzer()
     //private let usdaService = NutritionService()
 
     var body: some View {

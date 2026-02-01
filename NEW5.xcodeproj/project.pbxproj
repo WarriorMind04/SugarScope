@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7480587D2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 7480587C2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel */; };
-		7480587E2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 7480587C2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel */; };
 		74DC98DB2F2A7A500085CF55 /* SugarScopeWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 74DC98D12F2A7A500085CF55 /* SugarScopeWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -38,13 +36,26 @@
 
 /* Begin PBXFileReference section */
 		691768922F28CB23002F76D3 /* NEW5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NEW5.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		7480587C2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "DiabetesFoodClassifier Final.mlmodel"; sourceTree = "<group>"; };
 		74DC98D12F2A7A500085CF55 /* SugarScopeWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SugarScopeWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		744A337B2F2F961500BF18AF /* Exceptions for "NEW5" folder in "SugarScopeWatch Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"ML/DiabetesFoodClassifier Final.mlmodel",
+				ML/DiabetesFoodClassifierPro.mlmodel,
+			);
+			target = 74DC98D02F2A7A500085CF55 /* SugarScopeWatch Watch App */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		691768942F28CB23002F76D3 /* NEW5 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				744A337B2F2F961500BF18AF /* Exceptions for "NEW5" folder in "SugarScopeWatch Watch App" target */,
+			);
 			path = NEW5;
 			sourceTree = "<group>";
 		};
@@ -79,7 +90,6 @@
 				691768942F28CB23002F76D3 /* NEW5 */,
 				74DC98D22F2A7A500085CF55 /* SugarScopeWatch Watch App */,
 				691768932F28CB23002F76D3 /* Products */,
-				7480587C2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel */,
 			);
 			sourceTree = "<group>";
 		};
@@ -201,7 +211,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7480587D2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,7 +218,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7480587E2F2B6D1600BF9B20 /* DiabetesFoodClassifier Final.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
