@@ -11,7 +11,7 @@ import Foundation
 import Vision
 import UIKit
 
-final class FoodAnalyzer: Sendable {
+final class FoodAnalyzer: Sendable, FoodAnalyzing {
 
     private let confidenceThreshold: Float = 0.15
     private let maxItemsPerMeal: Int = 8

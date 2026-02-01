@@ -12,7 +12,7 @@ import Vision
 import UIKit
 import CoreML
 
-final class FoodAnalyzerML: Sendable {
+final class FoodAnalyzerML: Sendable, FoodAnalyzing {
 
     private let confidenceThreshold: Float = 0.15
     private let maxItemsPerMeal: Int = 8
