@@ -195,7 +195,7 @@ struct ScanFoodView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    private func handleImage(_ image: UIImage) {
+    /*private func handleImage(_ image: UIImage) {
         showCamera = false
         showPhotoLibrary = false
         capturedImage = image
@@ -219,6 +219,61 @@ struct ScanFoodView: View {
                 }
             }
         }
+    }*/
+    
+    private func handleImage(_ image: UIImage) {
+        showCamera = false
+        showPhotoLibrary = false
+        capturedImage = image
+        analysisError = nil
+        isAnalyzing = true
+
+        Task {
+            do {
+                let items = try await currentAnalyzer.analyze(image: image)
+
+                await MainActor.run {
+                    analyzedItems = items
+                    isAnalyzing = false
+                    showResults = true
+                }
+            } catch {
+                // 🔥 LOG COMPLETO EN CONSOLA
+                logAnalysisError(error)
+
+                await MainActor.run {
+                    analysisError = userFriendlyMessage(from: error)
+                    isAnalyzing = false
+                }
+            }
+        }
+    }
+    
+    private func logAnalysisError(_ error: Error) {
+        print("❌ [ScanFoodView] Analysis failed")
+        print("➡️ Error type:", type(of: error))
+        print("➡️ Description:", error.localizedDescription)
+
+        let nsError = error as NSError
+        print("➡️ Domain:", nsError.domain)
+        print("➡️ Code:", nsError.code)
+        print("➡️ UserInfo:", nsError.userInfo)
+    }
+    
+    private func userFriendlyMessage(from error: Error) -> String {
+        let nsError = error as NSError
+
+        // Errores de red
+        if nsError.domain == NSURLErrorDomain {
+            return "No internet connection. Please try again."
+        }
+
+        // Errores de modelo ML
+        if nsError.domain.contains("ML") {
+            return "The image could not be analyzed. Try another photo."
+        }
+
+        return "Analysis failed with \(analyzerType.displayName). Please try again."
     }
 }
 
