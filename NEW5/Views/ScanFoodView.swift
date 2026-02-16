@@ -311,3 +311,4 @@ enum AnalyzerType: String, CaseIterable, Identifiable {
 #Preview {
     ScanFoodView()
 }
+
