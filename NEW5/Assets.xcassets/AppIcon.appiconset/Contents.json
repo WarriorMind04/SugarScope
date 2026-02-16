@@ -1,13 +1,13 @@
 {
   "images" : [
     {
-      "filename" : "ch51024appiconFINAL.png",
+      "filename" : "app icon ch5.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
     },
     {
-      "filename" : "ch51024appiconFINAL 1.png",
+      "filename" : "app icon ch5 1.png",
       "idiom" : "universal",
       "platform" : "watchos",
       "size" : "1024x1024"
