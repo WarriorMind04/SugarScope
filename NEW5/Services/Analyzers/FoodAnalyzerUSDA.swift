@@ -278,6 +278,7 @@ enum AnalyzerError: Error, Sendable {
     case noIngredientsAvailable
 }
 
+//Change the portionDescription
 extension Food {
     func toNutritionInfo() -> NutritionInfo {
         NutritionInfo(

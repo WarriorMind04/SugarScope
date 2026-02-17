@@ -25,7 +25,7 @@ final class FoodAnalyzerML: Sendable, FoodAnalyzing {
     private lazy var visionModel: VNCoreMLModel = {
         do {
             //let model = try DiabetesFoodClassifier_Final(configuration: MLModelConfiguration()).model
-            let model = try DiabetesFoodClassifierPro(configuration: MLModelConfiguration()).model
+            let model = try DiabetesFoodClassifierProMax(configuration: MLModelConfiguration()).model
             return try VNCoreMLModel(for: model)
         } catch {
             fatalError("❌ Failed to load DiabetesFoodClassifier model: \(error)")

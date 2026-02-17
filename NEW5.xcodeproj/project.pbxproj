@@ -45,6 +45,7 @@
 			membershipExceptions = (
 				"ML/DiabetesFoodClassifier Final.mlmodel",
 				ML/DiabetesFoodClassifierPro.mlmodel,
+				ML/DiabetesFoodClassifierProMax.mlmodel,
 			);
 			target = 74DC98D02F2A7A500085CF55 /* SugarScopeWatch Watch App */;
 		};

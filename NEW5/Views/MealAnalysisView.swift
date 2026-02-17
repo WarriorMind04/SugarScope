@@ -301,7 +301,8 @@ private struct FoodRowView: View {
                     .font(.caption)
                     .foregroundStyle(Color.black)
             }
-
+            
+            //portion description to change the g
             Text(item.nutrition.portionDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
