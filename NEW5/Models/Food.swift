@@ -11,6 +11,7 @@ struct Food: Identifiable, Codable {
     var id: Int { fdcId }
     let description: String
     let foodNutrients: [Nutrient]
+    let ingredients: String?  //new attribute
 
     struct Nutrient: Codable {
         let nutrientName: String
