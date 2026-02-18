@@ -162,7 +162,7 @@ private struct DailySummaryView: View {
                           + meals.compactMap(\.value).reduce(0, +)
 
            // 🔥 ENVÍA ALERTA AL WATCH (ahora de forma segura y asíncrona)
-           SugarAlertManager.shared.evaluate(totalSugar: totalSugar)
+        SugarAlertManager.shared.evaluate(totalSugar: totalSugar, dailyLimit: 25)
     }
 }
 
