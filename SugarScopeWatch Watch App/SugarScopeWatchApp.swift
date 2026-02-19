@@ -6,7 +6,7 @@
 //  File → New → Target → Watch App, then add these files to the Watch target.
 //
 
-import SwiftUI
+/*import SwiftUI
 
 @main
 struct SugarScopeWatchApp: App {
@@ -15,6 +15,28 @@ struct SugarScopeWatchApp: App {
             // Solicitar permisos de notificación al iniciar
             NotificationManager.shared.requestAuthorization()
         }
+    var body: some Scene {
+        WindowGroup {
+            WatchContentView()
+        }
+    }
+}
+*/
+import SwiftUI
+import UserNotifications
+
+@main
+struct SugarScopeWatchApp: App {
+    init() {
+        _ = WatchConnectivityManager.shared
+        
+        // Registrar delegate ANTES de pedir permisos
+        UNUserNotificationCenter.current().delegate = WatchConnectivityManager.shared
+        
+        // Solicitar permisos de notificación al iniciar
+        NotificationManager.shared.requestAuthorization()
+    }
+
     var body: some Scene {
         WindowGroup {
             WatchContentView()
