@@ -5,7 +5,7 @@
 //  Created by José Miguel Guerrero Jiménez on 01/02/26.
 //
 
-import Foundation
+/*import Foundation
 import SwiftData
 
 final class SugarAlertManager {
@@ -81,3 +81,85 @@ final class SugarAlertManager {
     }
 }
 
+*/
+import Foundation
+
+final class SugarAlertManager {
+    static let shared = SugarAlertManager()
+
+    private let warningThreshold: Double = 0.85
+    private let defaults = UserDefaults.standard
+
+    // Claves
+    private let alertsLogKey = "sugarAlert_log" // guarda array de timestamps del día
+
+    // Configuración
+    private let maxAlertsPerDay = 3
+    private let minIntervalBetweenAlerts: TimeInterval = 60 * 60 * 2 // 2 horas mínimo entre alertas
+
+    private init() {}
+
+    func evaluate(totalSugar: Double, dailyLimit: Double) {
+        guard dailyLimit > 0 else { return }
+
+        let ratio = totalSugar / dailyLimit
+
+        let level: SugarAlertLevel?
+        if ratio >= 1.0 {
+            level = .exceeded
+        } else if ratio >= warningThreshold {
+            level = .warning
+        } else {
+            cleanOldEntries() // limpiar logs de días anteriores
+            return
+        }
+
+        guard let level else { return }
+
+        // Obtener historial de alertas de hoy
+        let todayAlerts = todayAlertTimestamps()
+
+        // 1. Límite de alertas por día
+        guard todayAlerts.count < maxAlertsPerDay else {
+            print("ℹ️ Ya se enviaron \(maxAlertsPerDay) alertas hoy, omitiendo")
+            return
+        }
+
+        // 2. Intervalo mínimo entre alertas
+        if let lastAlert = todayAlerts.last {
+            let elapsed = Date().timeIntervalSince(lastAlert)
+            guard elapsed >= minIntervalBetweenAlerts else {
+                let remaining = Int((minIntervalBetweenAlerts - elapsed) / 60)
+                print("ℹ️ Próxima alerta disponible en \(remaining) min")
+                return
+            }
+        }
+
+        // Registrar esta alerta
+        saveAlertTimestamp()
+
+        print("📤 Enviando alerta \(level.rawValue) (\(todayAlerts.count + 1)/\(maxAlertsPerDay) hoy)")
+        DispatchQueue.global(qos: .utility).async {
+            WatchBridge.shared.sendAlert(level: level, sugar: totalSugar, limit: dailyLimit)
+        }
+    }
+
+    // MARK: - Private
+
+    private func todayAlertTimestamps() -> [Date] {
+        let all = (defaults.array(forKey: alertsLogKey) as? [Date]) ?? []
+        return all.filter { Calendar.current.isDateInToday($0) }
+    }
+
+    private func saveAlertTimestamp() {
+        var all = todayAlertTimestamps() // solo guardamos las de hoy
+        all.append(Date())
+        defaults.set(all, forKey: alertsLogKey)
+    }
+
+    private func cleanOldEntries() {
+        // Limpiar timestamps de días anteriores para no acumular basura
+        let todayOnly = todayAlertTimestamps()
+        defaults.set(todayOnly, forKey: alertsLogKey)
+    }
+}

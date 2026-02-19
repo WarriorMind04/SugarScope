@@ -5,7 +5,7 @@
 //  Log blood glucose, meals, sugar intake, medications.
 //
 
-/*import SwiftUI
+import SwiftUI
 import SwiftData
 
 struct LogHealthView: View {
@@ -178,8 +178,10 @@ private struct LogSection<Content: View>: View {
     }
     .modelContainer(for: [HealthLogEntry.self, Medication.self, ReminderConfig.self], inMemory: true)
 }
-*/
-import SwiftUI
+
+
+
+/*import SwiftUI
 import SwiftData
 
 struct LogHealthView: View {
@@ -399,3 +401,4 @@ private struct LogSection<Content: View>: View {
     }
     .modelContainer(for: [HealthLogEntry.self, Medication.self, ReminderConfig.self], inMemory: true)
 }
+*/
