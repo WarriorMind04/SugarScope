@@ -290,6 +290,13 @@ enum AnalyzerType: String, CaseIterable, Identifiable {
         case .usdaAPI: return "Vision API"
         }
     }
+
+    var shortName: String {
+        switch self {
+        case .mlModel: return "ML"
+        case .usdaAPI: return "API"
+        }
+    }
     
     var icon: String {
         switch self {

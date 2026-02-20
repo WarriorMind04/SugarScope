@@ -37,7 +37,22 @@ struct LogHealthView: View {
             }
             .padding(20)
         }
-        .background(Color(red: 0.96, green: 0.98, blue: 0.96))
+//        .background(Color(red: 0.96, green: 0.98, blue: 0.96))
+        .background {
+            ZStack {
+                Color.sugarOffWhite
+                    .ignoresSafeArea()
+                
+                Image("scanbackground")
+                    .resizable()
+                    .scaledToFill()
+//                            .ignoresSafeArea()
+                
+                Color.sugarOffWhite.opacity(0.5)
+                    .ignoresSafeArea()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
         .navigationTitle("Log")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Logged", isPresented: $showLogged) {
