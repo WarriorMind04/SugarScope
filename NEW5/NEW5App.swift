@@ -14,6 +14,7 @@ struct NEW5App: App {
     var body: some Scene {
         WindowGroup {
             RootTabView()
+//            ScannerView()
         }
         .modelContainer(for: [HealthLogEntry.self, Medication.self, ReminderConfig.self])
     }
