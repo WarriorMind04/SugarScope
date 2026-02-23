@@ -16,6 +16,6 @@ struct NEW5App: App {
             RootTabView()
 //            ScannerView()
         }
-        .modelContainer(for: [HealthLogEntry.self, Medication.self, ReminderConfig.self])
+        .modelContainer(for: [HealthLogEntry.self, Medication.self, ReminderConfig.self, UserProfile.self])
     }
 }
