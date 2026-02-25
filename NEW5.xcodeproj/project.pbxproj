@@ -364,7 +364,7 @@
 				DEVELOPMENT_TEAM = 5VP98DA8WB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = SmartPlate;
+				INFOPLIST_KEY_CFBundleDisplayName = SugarLense;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SugarScope needs camera access to photograph your meals for nutrition analysis.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SugarScope needs photo library access to analyze photos of your meals.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -401,7 +401,7 @@
 				DEVELOPMENT_TEAM = 5VP98DA8WB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = SmartPlate;
+				INFOPLIST_KEY_CFBundleDisplayName = SugarLense;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SugarScope needs camera access to photograph your meals for nutrition analysis.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SugarScope needs photo library access to analyze photos of your meals.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -439,7 +439,7 @@
 				DEVELOPMENT_TEAM = 5VP98DA8WB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = SugarScopeWatch;
+				INFOPLIST_KEY_CFBundleDisplayName = SugarLenseWatch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.fatemehabolhasani.NEW5;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -473,7 +473,7 @@
 				DEVELOPMENT_TEAM = 5VP98DA8WB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = SugarScopeWatch;
+				INFOPLIST_KEY_CFBundleDisplayName = SugarLenseWatch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.fatemehabolhasani.NEW5;
 				LD_RUNPATH_SEARCH_PATHS = (
