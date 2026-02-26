@@ -7,6 +7,7 @@
 
 
 
+
 import SwiftUI
 import SwiftData
 import UIKit
@@ -65,19 +66,24 @@ struct MealAnalysisViewProtTwoo: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
+        VStack(spacing: 0) {
+            
+            // Only the content below scrolls
+            ZStack(alignment: .bottom) {
+                ScrollView(showsIndicators: false) {
                     imageSection
                     contentSection
-                        .padding(.bottom, 100)
+                        .padding(.bottom, 88)
+                        .frame(maxWidth: .infinity)
                 }
-            }
-            .background(Color(hex: "eef2f7"))
-            .ignoresSafeArea(edges: .top)
+                .frame(maxWidth: .infinity)
+                .background(Color(hex: "eef2f7"))
+                .scrollBounceBehavior(.basedOnSize)
 
-            saveMealButton
+                saveMealButton
+            }
         }
+        .background(Color(hex: "eef2f7").ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $selectedItem) { item in
             IngredientsView(foodItem: item, apiAnalyzer: apiAnalyzer)
@@ -194,8 +200,10 @@ struct MealAnalysisViewProtTwoo: View {
                             .offset(x: max(0, xPos - 1.5), y: -5)
                             .animation(.easeOut(duration: 0.8).delay(0.3), value: animateBar)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: 8)
                 }
-                .frame(height: 8)
+                .frame(maxWidth: .infinity, minHeight: 8, maxHeight: 8)
+                .clipped()
 
                 HStack {
                     Text("70")
