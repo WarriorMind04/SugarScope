@@ -5,405 +5,8 @@
 //  Created by José Miguel Guerrero Jiménez on 18/02/26.
 //
 
-/*import SwiftUI
-import SwiftData
-import UIKit
 
-struct MealAnalysisViewProtTwoo: View {
-    let items: [IdentifiedFoodItem]
-    let image: UIImage?
-    var onLogMeal: (([IdentifiedFoodItem]) -> Void)?
 
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-    @State private var didLog = false
-    @State private var selectedItem: IdentifiedFoodItem?
-    @State private var animateRings = false
-
-    private let apiAnalyzer = FoodAnalyzer()
-
-    private var totalSugar: Double    { items.reduce(0) { $0 + $1.nutrition.sugar } }
-    private var totalCarbs: Double    { items.reduce(0) { $0 + $1.nutrition.carbohydrates } }
-    private var totalFat: Double      { items.reduce(0) { $0 + $1.nutrition.fat } }
-    private var totalCalories: Double { items.reduce(0) { $0 + $1.nutrition.calories } }
-    private var totalProtein: Double  { items.reduce(0) { $0 + $1.nutrition.protein } }
-
-    // Health score heurístico (0–10) basado en ratio azúcar/calorías
-    private var healthScore: Double {
-        guard totalCalories > 0 else { return 5 }
-        let sugarRatio = (totalSugar * 4) / totalCalories
-        return max(0, min(10, 10 - sugarRatio * 20))
-    }
-
-    var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
-                heroSection
-                contentSection
-            }
-        }
-        .ignoresSafeArea(edges: .top)
-        .background(Color(red: 0.97, green: 0.96, blue: 0.93))
-        .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $selectedItem) { item in
-            IngredientsView(foodItem: item, apiAnalyzer: apiAnalyzer)
-        }
-        .onAppear { withAnimation(.easeOut(duration: 0.9).delay(0.2)) { animateRings = true } }
-    }
-
-    // MARK: - Hero
-
-    private var heroSection: some View {
-        ZStack(alignment: .bottom) {
-            Group {
-                if let img = image {
-                    Image(uiImage: img)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } else {
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(red: 0.18, green: 0.22, blue: 0.18),
-                                         Color(red: 0.28, green: 0.38, blue: 0.28)],
-                                startPoint: .topLeading, endPoint: .bottomTrailing
-                            )
-                        )
-                        .overlay(
-                            Image(systemName: "fork.knife")
-                                .font(.system(size: 64))
-                                .foregroundStyle(.white.opacity(0.15))
-                        )
-                }
-            }
-            .frame(height: 300)
-            .clipped()
-
-            // Gradiente inferior para legibilidad
-            LinearGradient(
-                colors: [.clear, Color(red: 0.97, green: 0.96, blue: 0.93)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 120)
-
-            // Título de la comida
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Scan Result")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                    .kerning(1.5)
-                Text(items.first?.name ?? "Your Meal")
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 16)
-        }
-    }
-
-    // MARK: - Content
-
-    private var contentSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            caloriesRow
-            macroRingsRow
-            healthScoreRow
-            foodListSection
-            logButton
-            disclaimer
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 4)
-        .padding(.bottom, 40)
-    }
-
-    // Fila de calorías totales
-    private var caloriesRow: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Total")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-                Text("\(Int(totalCalories)) Kcal")
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-            }
-            Spacer()
-            Image(systemName: "flame.fill")
-                .font(.system(size: 28))
-                .foregroundStyle(
-                    LinearGradient(colors: [.orange, .red], startPoint: .top, endPoint: .bottom)
-                )
-        }
-        .padding(16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
-
-    // Tres anillos animados: Carbs, Protein, Fats
-    private var macroRingsRow: some View {
-        HStack(spacing: 0) {
-            MacroRing(label: "Carbs",   value: totalCarbs,   max: 60, unit: "g",
-                      color: Color(red: 0.95, green: 0.65, blue: 0.2),  animate: animateRings)
-            MacroRing(label: "Protein", value: totalProtein, max: 50, unit: "g",
-                      color: Color(red: 0.35, green: 0.6, blue: 0.85),  animate: animateRings)
-            MacroRing(label: "Fats",    value: totalFat,     max: 40, unit: "g",
-                      color: Color(red: 0.35, green: 0.72, blue: 0.5),  animate: animateRings)
-        }
-        .padding(.vertical, 16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
-
-    // Barra de health score
-    private var healthScoreRow: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "heart.fill")
-                    .foregroundStyle(.red)
-                Text(healthScoreLabel)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-                Spacer()
-                Text(String(format: "%.0f/10", healthScore))
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(.secondary)
-            }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(white: 0.9))
-                        .frame(height: 6)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(healthScoreColor)
-                        .frame(width: animateRings ? geo.size.width * (healthScore / 10) : 0, height: 6)
-                        .animation(.easeOut(duration: 1.0).delay(0.3), value: animateRings)
-                }
-            }
-            .frame(height: 6)
-        }
-        .padding(16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
-
-    private var healthScoreLabel: String {
-        switch healthScore {
-        case 8...: return "High Health Score"
-        case 5..<8: return "Moderate Health Score"
-        default:    return "Low Health Score"
-        }
-    }
-
-    private var healthScoreColor: Color {
-        switch healthScore {
-        case 7...: return Color(red: 0.2, green: 0.7, blue: 0.4)
-        case 4..<7: return .orange
-        default:   return .red
-        }
-    }
-
-    // Lista de alimentos identificados
-    private var foodListSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Identified Foods")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .kerning(0.8)
-
-            ForEach(items) { item in
-                FoodRowView(item: item, onShowIngredients: { selectedItem = item })
-            }
-        }
-    }
-
-    // Botón log
-    private var logButton: some View {
-        Button {
-            logMeal()
-        } label: {
-            HStack(spacing: 8) {
-                if didLog {
-                    Image(systemName: "checkmark")
-                    Text("Logged!")
-                } else {
-                    Text("Log this meal")
-                }
-            }
-            .font(.system(size: 16, weight: .semibold, design: .rounded))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                didLog
-                ? Color(red: 0.2, green: 0.55, blue: 0.35).opacity(0.5)
-                : Color(red: 0.08, green: 0.08, blue: 0.08)
-            )
-            .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-        }
-        .disabled(didLog)
-        .animation(.easeInOut(duration: 0.3), value: didLog)
-    }
-
-    private var disclaimer: some View {
-        Text("Nutrition and portions are estimates. Focus on sugar and carbs for diabetes management. Consult a dietitian for personalized advice.")
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Log
-
-    private func logMeal() {
-        let entry = HealthLogEntry(
-            timestamp: Date(),
-            kind: HealthLogEntry.kindMeal,
-            value: totalSugar,
-            unit: "g",
-            secondaryValue: totalCarbs,
-            note: "\(Int(totalCalories)) kcal",
-            mealDescription: items.map(\.name).joined(separator: ", ")
-        )
-        modelContext.insert(entry)
-        try? modelContext.save()
-        didLog = true
-        onLogMeal?(items)
-    }
-}
-
-// MARK: - MacroRing
-
-private struct MacroRing: View {
-    let label: String
-    let value: Double
-    let max: Double
-    let unit: String
-    let color: Color
-    let animate: Bool
-
-    private var progress: Double { Swift.min(1, value / max) }
-
-    var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .stroke(color.opacity(0.15), lineWidth: 8)
-                    .frame(width: 72, height: 72)
-                Circle()
-                    .trim(from: 0, to: animate ? progress : 0)
-                    .stroke(color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: 72, height: 72)
-                    .animation(.easeOut(duration: 0.9).delay(0.2), value: animate)
-                VStack(spacing: 1) {
-                    Text("\(Int(value))")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-                    Text(unit)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Text(label)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-// MARK: - FoodRowView
-
-private struct FoodRowView: View {
-    let item: IdentifiedFoodItem
-    let onShowIngredients: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(item.name)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-                Spacer()
-                Text(item.nutrition.caloriesFormatted)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-            }
-            Text(item.nutrition.portionDescription)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    NutriBadge(label: "Sugar",   value: item.nutrition.sugar,          color: .red)
-                    NutriBadge(label: "Carbs",   value: item.nutrition.carbohydrates,  color: Color(red: 0.95, green: 0.65, blue: 0.2))
-                    NutriBadge(label: "Fat",     value: item.nutrition.fat,            color: Color(red: 0.35, green: 0.72, blue: 0.5))
-                    NutriBadge(label: "Protein", value: item.nutrition.protein,        color: Color(red: 0.35, green: 0.6, blue: 0.85))
-                }
-            }
-
-            Button(action: onShowIngredients) {
-                Label("View ingredients", systemImage: "list.bullet")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Color(red: 0.2, green: 0.55, blue: 0.35))
-            }
-            .padding(.top, 2)
-        }
-        .padding(14)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
-    }
-}
-
-private struct NutriBadge: View {
-    let label: String
-    let value: Double
-    let color: Color
-
-    var body: some View {
-        Text("\(label): \(String(format: "%.1f", value))g")
-            .font(.system(size: 12, weight: .bold, design: .rounded))
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
-            .foregroundStyle(color)
-            .background(color.opacity(0.12))
-            .clipShape(RoundedRectangle(cornerRadius: 7))
-    }
-}
-
-#Preview {
-    NavigationStack {
-        MealAnalysisViewProtTwoo(
-            items: [
-                IdentifiedFoodItem(
-                    name: "Spaghetti al pomodoro",
-                    nutrition: NutritionInfo(calories: 420, carbohydrates: 62, sugar: 8, fat: 11, protein: 14, fiber: 4, portionDescription: "1 portion (280 g)"),
-                    confidence: 0.91,
-                    visionIdentifier: "pasta"
-                ),
-                IdentifiedFoodItem(
-                    name: "Basil garnish",
-                    nutrition: NutritionInfo(calories: 5, carbohydrates: 0.6, sugar: 0.1, fat: 0.1, protein: 0.4, fiber: 0.3, portionDescription: "few leaves (5 g)"),
-                    confidence: 0.85,
-                    visionIdentifier: "basil"
-                ),
-            ],
-            image: nil,
-            onLogMeal: nil
-        )
-    }
-    .modelContainer(for: [HealthLogEntry.self, Medication.self, ReminderConfig.self], inMemory: true)
-}
-*/
 import SwiftUI
 import SwiftData
 import UIKit
@@ -417,7 +20,7 @@ struct MealAnalysisViewProtTwoo: View {
     @Environment(\.dismiss) private var dismiss
     @State private var didLog = false
     @State private var selectedItem: IdentifiedFoodItem?
-    @State private var animateRings = false
+    @State private var animateBar = false
 
     private let apiAnalyzer = FoodAnalyzer()
 
@@ -427,32 +30,67 @@ struct MealAnalysisViewProtTwoo: View {
     private var totalCalories: Double { items.reduce(0) { $0 + $1.nutrition.calories } }
     private var totalProtein: Double  { items.reduce(0) { $0 + $1.nutrition.protein } }
 
-    private var healthScore: Double {
-        guard totalCalories > 0 else { return 5 }
-        let sugarRatio = (totalSugar * 4) / totalCalories
-        return max(0, min(10, 10 - sugarRatio * 20))
+    // Predicted peak glucose heuristic
+    private var predictedPeakGlucose: Int {
+        let base = 90.0
+        let carbImpact = totalCarbs * 1.2
+        let proteinDampen = totalProtein * 0.3
+        let fatDampen = totalFat * 0.2
+        return Int(min(280, base + carbImpact - proteinDampen - fatDampen))
+    }
+
+    private var glucoseStatus: (label: String, color: Color) {
+        switch predictedPeakGlucose {
+        case ..<100: return ("Low Impact", Color(hex: "3b82f6"))
+        case 100..<140: return ("In Range", Color(hex: "22c55e"))
+        case 140..<180: return ("Elevated", .orange)
+        default: return ("High", .red)
+        }
+    }
+
+    private var glucoseBarPosition: Double {
+        let clamped = min(max(Double(predictedPeakGlucose), 70), 220)
+        return (clamped - 70) / 150
+    }
+
+    private var smartInsight: String {
+        if totalProtein > 20 && totalCarbs < 50 {
+            return "Great balance! The high protein helps slow carb absorption. Consider a 10-minute walk after eating to perfectly smooth out your glucose spike."
+        } else if totalCarbs > 60 {
+            return "This meal is high in carbs. Pair it with a short walk or some protein to help blunt the glucose response."
+        } else if totalFat > 20 {
+            return "The fat content will slow digestion and may delay the glucose peak. Monitor your levels 2–3 hours after eating."
+        }
+        return "Balanced meal! The mix of macros should produce a moderate, steady glucose response. Stay hydrated."
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
-                heroSection
-                contentSection
+        ZStack(alignment: .bottom) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    imageSection
+                    contentSection
+                        .padding(.bottom, 100)
+                }
             }
+            .background(Color(hex: "eef2f7"))
+            .ignoresSafeArea(edges: .top)
+
+            saveMealButton
         }
-        .ignoresSafeArea(edges: .top)
-        .background(Color(red: 0.97, green: 0.96, blue: 0.93))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $selectedItem) { item in
             IngredientsView(foodItem: item, apiAnalyzer: apiAnalyzer)
         }
-        .onAppear { withAnimation(.easeOut(duration: 0.9).delay(0.2)) { animateRings = true } }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8).delay(0.3)) { animateBar = true }
+        }
     }
 
-    // MARK: - Hero
+    // MARK: - Image Section
 
-    private var heroSection: some View {
-        ZStack(alignment: .bottom) {
+    private var imageSection: some View {
+        ZStack(alignment: .bottomTrailing) {
             Group {
                 if let img = image {
                     Image(uiImage: img)
@@ -460,253 +98,269 @@ struct MealAnalysisViewProtTwoo: View {
                         .aspectRatio(contentMode: .fill)
                 } else {
                     Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(red: 0.18, green: 0.22, blue: 0.18),
-                                         Color(red: 0.28, green: 0.38, blue: 0.28)],
-                                startPoint: .topLeading, endPoint: .bottomTrailing
-                            )
-                        )
+                        .fill(Color(hex: "d1dce8"))
                         .overlay(
                             Image(systemName: "fork.knife")
-                                .font(.system(size: 64))
-                                .foregroundStyle(.white.opacity(0.15))
+                                .font(.system(size: 48))
+                                .foregroundStyle(Color(hex: "3b82f6").opacity(0.3))
                         )
                 }
             }
-            .frame(height: 300)
+            .frame(maxWidth: .infinity)
+            .frame(height: 260)
             .clipped()
 
-            LinearGradient(
-                colors: [.clear, Color(red: 0.97, green: 0.96, blue: 0.93)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 120)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Scan Result")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                    .kerning(1.5)
-                Text(items.first?.name ?? "Your Meal")
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
+            Button { dismiss() } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Retake")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.black.opacity(0.55))
+                .clipShape(Capsule())
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 16)
+            .padding(16)
         }
     }
 
     // MARK: - Content
 
     private var contentSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            caloriesRow
-            macroRingsRow
-            healthScoreRow
-            foodListSection
-            logButton
-
-            // ⚠️ DEBUG — borra esta sección antes de publicar
+        VStack(spacing: 12) {
+            glucoseCard
+            macroGrid
+            insightCard
+            detectedFoodsSection
             debugSection
-
-            disclaimer
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 4)
-        .padding(.bottom, 40)
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
     }
 
-    private var caloriesRow: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Total")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-                Text("\(Int(totalCalories)) Kcal")
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
+    // MARK: - Glucose Card
+
+    private var glucoseCard: some View {
+        VStack(spacing: 16) {
+            Text("Predicted Peak Glucose")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color(hex: "64748b"))
+
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Text("\(predictedPeakGlucose)")
+                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(hex: "0f172a"))
+                Text("mg/dL")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(Color(hex: "64748b"))
+                    .padding(.bottom, 6)
             }
-            Spacer()
-            Image(systemName: "flame.fill")
-                .font(.system(size: 28))
-                .foregroundStyle(
-                    LinearGradient(colors: [.orange, .red], startPoint: .top, endPoint: .bottom)
-                )
-        }
-        .padding(16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
 
-    private var macroRingsRow: some View {
-        HStack(spacing: 0) {
-            MacroRing(label: "Carbs",   value: totalCarbs,   max: 60, unit: "g",
-                      color: Color(red: 0.95, green: 0.65, blue: 0.2),  animate: animateRings)
-            MacroRing(label: "Protein", value: totalProtein, max: 50, unit: "g",
-                      color: Color(red: 0.35, green: 0.6, blue: 0.85),  animate: animateRings)
-            MacroRing(label: "Fats",    value: totalFat,     max: 40, unit: "g",
-                      color: Color(red: 0.35, green: 0.72, blue: 0.5),  animate: animateRings)
-        }
-        .padding(.vertical, 16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-    }
-
-    private var healthScoreRow: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "heart.fill")
-                    .foregroundStyle(.red)
-                Text(healthScoreLabel)
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 13))
+                Text(glucoseStatus.label)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-                Spacer()
-                Text(String(format: "%.0f/10", healthScore))
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(.secondary)
             }
-            GeometryReader { geo in
+            .foregroundStyle(.white)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 8)
+            .background(glucoseStatus.color)
+            .clipShape(Capsule())
+
+            VStack(spacing: 6) {
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(white: 0.9))
-                        .frame(height: 6)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(healthScoreColor)
-                        .frame(width: animateRings ? geo.size.width * (healthScore / 10) : 0, height: 6)
-                        .animation(.easeOut(duration: 1.0).delay(0.3), value: animateRings)
+                    LinearGradient(
+                        stops: [
+                            .init(color: Color(hex: "f97316"), location: 0),
+                            .init(color: Color(hex: "22c55e"), location: 0.2),
+                            .init(color: Color(hex: "22c55e"), location: 0.72),
+                            .init(color: Color(hex: "ef4444"), location: 1),
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(height: 8)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                    GeometryReader { geo in
+                        let xPos = geo.size.width * (animateBar ? min(max(glucoseBarPosition, 0), 1) : 0)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color(hex: "0f172a"))
+                            .frame(width: 3, height: 18)
+                            .offset(x: max(0, xPos - 1.5), y: -5)
+                            .animation(.easeOut(duration: 0.8).delay(0.3), value: animateBar)
+                    }
                 }
+                .frame(height: 8)
+
+                HStack {
+                    Text("70")
+                    Spacer()
+                    Text("Target Range")
+                    Spacer()
+                    Text("180+")
+                }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Color(hex: "94a3b8"))
             }
-            .frame(height: 6)
         }
-        .padding(16)
+        .padding(20)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
+    }
+
+    // MARK: - Macro Grid
+
+    private var macroGrid: some View {
+        HStack(spacing: 0) {
+            MacroCell(value: String(format: "%.0fg", totalCarbs),   label: "Carbs",   color: Color(hex: "3b82f6"))
+            Divider().frame(height: 40)
+            MacroCell(value: String(format: "%.0fg", totalProtein), label: "Protein", color: Color(hex: "0f172a"))
+            Divider().frame(height: 40)
+            MacroCell(value: "\(Int(totalCalories))",               label: "kcal",    color: Color(hex: "0f172a"))
+        }
+        .padding(.vertical, 18)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 
-    private var healthScoreLabel: String {
-        switch healthScore {
-        case 8...: return "High Health Score"
-        case 5..<8: return "Moderate Health Score"
-        default:    return "Low Health Score"
-        }
-    }
+    // MARK: - Insight Card
 
-    private var healthScoreColor: Color {
-        switch healthScore {
-        case 7...: return Color(red: 0.2, green: 0.7, blue: 0.4)
-        case 4..<7: return .orange
-        default:   return .red
-        }
-    }
-
-    private var foodListSection: some View {
+    private var insightCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Identified Foods")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .kerning(0.8)
+            Text("SMART AI INSIGHTS")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Color(hex: "64748b"))
+                .kerning(1.2)
 
-            ForEach(items) { item in
-                FoodRowView(item: item, onShowIngredients: { selectedItem = item })
-            }
-        }
-    }
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "sparkle.magnifyingglass")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(Color(hex: "3b82f6"))
+                    .padding(.top, 1)
 
-    private var logButton: some View {
-        Button {
-            logMeal()
-        } label: {
-            HStack(spacing: 8) {
-                if didLog {
-                    Image(systemName: "checkmark")
-                    Text("Logged!")
-                } else {
-                    Text("Log this meal")
-                }
+                Text(smartInsight)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color(hex: "1e293b"))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineSpacing(3)
             }
-            .font(.system(size: 16, weight: .semibold, design: .rounded))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                didLog
-                ? Color(red: 0.2, green: 0.55, blue: 0.35).opacity(0.5)
-                : Color(red: 0.08, green: 0.08, blue: 0.08)
-            )
-            .foregroundStyle(.white)
+            .padding(16)
+            .background(Color(hex: "fbbf24").opacity(0.22))
             .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .disabled(didLog)
-        .animation(.easeInOut(duration: 0.3), value: didLog)
     }
 
-    private var disclaimer: some View {
-        Text("Nutrition and portions are estimates. Focus on sugar and carbs for diabetes management. Consult a dietitian for personalized advice.")
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
+    // MARK: - Detected Foods
+
+    private var detectedFoodsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("DETECTED FOODS")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Color(hex: "64748b"))
+                .kerning(1.2)
+
+            VStack(spacing: 0) {
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    DetectedFoodRow(item: item, onTap: { selectedItem = item })
+                    if index < items.count - 1 {
+                        Divider().padding(.leading, 16)
+                    }
+                }
+            }
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        }
+    }
+
+    // MARK: - Save Meal (sticky)
+
+    private var saveMealButton: some View {
+        VStack(spacing: 0) {
+            Divider().opacity(0.2)
+            Button { logMeal() } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 15, weight: .bold))
+                    Text(didLog ? "Saved!" : "Save Meal")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(didLog ? Color(hex: "22c55e") : Color(hex: "3b82f6"))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .animation(.easeInOut(duration: 0.3), value: didLog)
+            }
+            .disabled(didLog)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(hex: "eef2f7"))
+        }
     }
 
     // ⚠️ DEBUG — borra todo este bloque antes de publicar en App Store
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Watch Alert Debug", systemImage: "ant.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.secondary)
+            Text("WATCH ALERT DEBUG")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Color(hex: "64748b"))
+                .kerning(1.2)
 
-            Button {
-                UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
-                SugarAlertManager.shared.evaluate(totalSugar: 30, dailyLimit: 25)
-                print("🚨 Alerta exceeded forzada")
-            } label: {
-                Label("Force: Limit Exceeded", systemImage: "exclamationmark.triangle.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.red.opacity(0.08))
-                    .foregroundStyle(.red)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-            }
+            VStack(spacing: 8) {
+                Button {
+                    UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
+                    SugarAlertManager.shared.evaluate(totalSugar: 30, dailyLimit: 25)
+                    print("🚨 Alerta exceeded forzada")
+                } label: {
+                    Label("Force: Limit Exceeded", systemImage: "exclamationmark.triangle.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.red.opacity(0.08))
+                        .foregroundStyle(.red)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
 
-            Button {
-                UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
-                SugarAlertManager.shared.evaluate(totalSugar: 22, dailyLimit: 25)
-                print("⚠️ Alerta warning forzada")
-            } label: {
-                Label("Force: Almost at Limit", systemImage: "bolt.heart.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.orange.opacity(0.08))
-                    .foregroundStyle(.orange)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-            }
+                Button {
+                    UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
+                    SugarAlertManager.shared.evaluate(totalSugar: 22, dailyLimit: 25)
+                    print("⚠️ Alerta warning forzada")
+                } label: {
+                    Label("Force: Almost at Limit", systemImage: "bolt.heart.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.orange.opacity(0.08))
+                        .foregroundStyle(.orange)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
 
-            Button {
-                UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
-                print("🧹 Cache de alertas limpiado")
-            } label: {
-                Label("Reset Alert Cache", systemImage: "trash")
-                    .font(.system(size: 14, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.gray.opacity(0.08))
-                    .foregroundStyle(.secondary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                Button {
+                    UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
+                    print("🧹 Cache limpiado")
+                } label: {
+                    Label("Reset Alert Cache", systemImage: "trash")
+                        .font(.system(size: 14, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.gray.opacity(0.08))
+                        .foregroundStyle(.secondary)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
             }
+            .padding(16)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
         }
-        .padding(16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 
     // MARK: - Log
@@ -726,7 +380,6 @@ struct MealAnalysisViewProtTwoo: View {
         didLog = true
         onLogMeal?(items)
 
-        // Evaluar límite al loguear
         let controller = HealthLogController(modelContext: modelContext)
         let today = Date()
         let start = Calendar.current.startOfDay(for: today)
@@ -736,104 +389,55 @@ struct MealAnalysisViewProtTwoo: View {
     }
 }
 
-// MARK: - MacroRing
+// MARK: - MacroCell
 
-private struct MacroRing: View {
+private struct MacroCell: View {
+    let value: String
     let label: String
-    let value: Double
-    let max: Double
-    let unit: String
     let color: Color
-    let animate: Bool
-
-    private var progress: Double { Swift.min(1, value / max) }
 
     var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .stroke(color.opacity(0.15), lineWidth: 8)
-                    .frame(width: 72, height: 72)
-                Circle()
-                    .trim(from: 0, to: animate ? progress : 0)
-                    .stroke(color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: 72, height: 72)
-                    .animation(.easeOut(duration: 0.9).delay(0.2), value: animate)
-                VStack(spacing: 1) {
-                    Text("\(Int(value))")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-                    Text(unit)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
-            }
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundStyle(color)
             Text(label)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color(hex: "94a3b8"))
         }
         .frame(maxWidth: .infinity)
     }
 }
 
-// MARK: - FoodRowView
+// MARK: - DetectedFoodRow
 
-private struct FoodRowView: View {
+private struct DetectedFoodRow: View {
     let item: IdentifiedFoodItem
-    let onShowIngredients: () -> Void
+    let onTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(item.name)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.1, green: 0.12, blue: 0.1))
-                Spacer()
-                Text(item.nutrition.caloriesFormatted)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-            }
-            Text(item.nutrition.portionDescription)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    NutriBadge(label: "Sugar",   value: item.nutrition.sugar,          color: .red)
-                    NutriBadge(label: "Carbs",   value: item.nutrition.carbohydrates,  color: Color(red: 0.95, green: 0.65, blue: 0.2))
-                    NutriBadge(label: "Fat",     value: item.nutrition.fat,            color: Color(red: 0.35, green: 0.72, blue: 0.5))
-                    NutriBadge(label: "Protein", value: item.nutrition.protein,        color: Color(red: 0.35, green: 0.6, blue: 0.85))
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color(hex: "0f172a"))
+                    Text(item.nutrition.portionDescription)
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color(hex: "94a3b8"))
                 }
+                Spacer()
+                Text(String(format: "%.0fg", item.nutrition.carbohydrates))
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(hex: "0f172a"))
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color(hex: "cbd5e1"))
             }
-
-            Button(action: onShowIngredients) {
-                Label("View ingredients", systemImage: "list.bullet")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Color(red: 0.2, green: 0.55, blue: 0.35))
-            }
-            .padding(.top, 2)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
-        .padding(14)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
-    }
-}
-
-private struct NutriBadge: View {
-    let label: String
-    let value: Double
-    let color: Color
-
-    var body: some View {
-        Text("\(label): \(String(format: "%.1f", value))g")
-            .font(.system(size: 12, weight: .bold, design: .rounded))
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
-            .foregroundStyle(color)
-            .background(color.opacity(0.12))
-            .clipShape(RoundedRectangle(cornerRadius: 7))
+        .buttonStyle(.plain)
     }
 }
 
@@ -842,16 +446,22 @@ private struct NutriBadge: View {
         MealAnalysisViewProtTwoo(
             items: [
                 IdentifiedFoodItem(
-                    name: "Spaghetti al pomodoro",
-                    nutrition: NutritionInfo(calories: 420, carbohydrates: 62, sugar: 8, fat: 11, protein: 14, fiber: 4, portionDescription: "1 portion (280 g)"),
-                    confidence: 0.91,
-                    visionIdentifier: "pasta"
+                    name: "Grilled Salmon",
+                    nutrition: NutritionInfo(calories: 280, carbohydrates: 0, sugar: 0, fat: 13, protein: 39, fiber: 0, portionDescription: "1 fillet (170g)"),
+                    confidence: 0.93,
+                    visionIdentifier: "salmon"
                 ),
                 IdentifiedFoodItem(
-                    name: "Basil garnish",
-                    nutrition: NutritionInfo(calories: 5, carbohydrates: 0.6, sugar: 0.1, fat: 0.1, protein: 0.4, fiber: 0.3, portionDescription: "few leaves (5 g)"),
-                    confidence: 0.85,
-                    visionIdentifier: "basil"
+                    name: "Brown Rice",
+                    nutrition: NutritionInfo(calories: 216, carbohydrates: 41, sugar: 0, fat: 1.8, protein: 5, fiber: 3.5, portionDescription: "1 cup, cooked"),
+                    confidence: 0.89,
+                    visionIdentifier: "rice"
+                ),
+                IdentifiedFoodItem(
+                    name: "Steamed Broccoli",
+                    nutrition: NutritionInfo(calories: 54, carbohydrates: 4, sugar: 1, fat: 0.6, protein: 3.7, fiber: 2.4, portionDescription: "1 cup, chopped"),
+                    confidence: 0.91,
+                    visionIdentifier: "broccoli"
                 ),
             ],
             image: nil,
