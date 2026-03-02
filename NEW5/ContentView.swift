@@ -29,10 +29,8 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.bottom, 80)
             
-            // Custom Tab Bar
-            CustomTabBar(selection: $selectedTab, onScanTap: {
-                selectedTab = 2
-            })
+           
+            
         }
         .ignoresSafeArea(.keyboard)
     }
