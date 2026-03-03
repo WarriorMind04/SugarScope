@@ -7,8 +7,18 @@
 
 
 
+
 import SwiftUI
 import SwiftData
+
+// MARK: - Keyboard Hide Extension
+
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                        to: nil, from: nil, for: nil)
+    }
+}
 
 struct LogHealthView: View {
     @Environment(\.modelContext) private var modelContext
@@ -41,6 +51,19 @@ struct LogHealthView: View {
         }
         .background(Color(hex: "f0f4f8").ignoresSafeArea())
         .navigationBarHidden(true)
+        .onTapGesture {
+            hideKeyboard()
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    hideKeyboard()
+                }
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color(hex: "3b82f6"))
+            }
+        }
         .overlay(alignment: .top) {
             if showLogged {
                 toastView
@@ -107,6 +130,7 @@ struct LogHealthView: View {
                     let e = HealthLogEntry(timestamp: Date(), kind: HealthLogEntry.kindGlucose, value: v, unit: "mg/dL")
                     controller.addEntry(e)
                     glucoseValue = ""
+                    hideKeyboard()
                     triggerToast("Glucose")
                 } label: {
                     Text("Log")
@@ -153,6 +177,7 @@ struct LogHealthView: View {
                     let e = HealthLogEntry(timestamp: Date(), kind: HealthLogEntry.kindSugar, value: v, unit: "g")
                     controller.addEntry(e, dailyLimit: 25)
                     sugarValue = ""
+                    hideKeyboard()
                     triggerToast("Sugar")
                 } label: {
                     Text("Log")
@@ -207,6 +232,7 @@ struct LogHealthView: View {
                     )
                     controller.addEntry(e, dailyLimit: 25)
                     mealDesc = ""; mealSugar = ""; mealCarbs = ""; mealCal = ""
+                    hideKeyboard()
                     triggerToast("Meal")
                 } label: {
                     HStack(spacing: 8) {
@@ -371,6 +397,3 @@ private struct NutrientField: View {
     }
     .modelContainer(for: [HealthLogEntry.self, Medication.self, ReminderConfig.self], inMemory: true)
 }
-
-
-
