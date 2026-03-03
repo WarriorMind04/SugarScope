@@ -14,8 +14,6 @@ struct ScannerView: View {
     // MARK: - Navigation Sheets
     @State private var showProfile   = false
     @State private var showReminders = false
-    
-    
 
     // MARK: - Analysis State
     @State private var capturedImage: UIImage?
@@ -24,16 +22,9 @@ struct ScannerView: View {
     @State private var analysisError: String?
     @State private var showResults   = false
 
-    // MARK: - Analyzer Selection
-    @State private var analyzerType: AnalyzerType = .mlModel
-    private let mlAnalyzer  = FoodAnalyzerML()
-    private let apiAnalyzer = FoodAnalyzer()
-    private var currentAnalyzer: any FoodAnalyzing {
-        switch analyzerType {
-        case .mlModel:  return mlAnalyzer
-        case .usdaAPI:  return apiAnalyzer
-        }
-    }
+    // MARK: - Analyzer (ML Model fixed)
+    private let mlAnalyzer = FoodAnalyzerML()
+    private var currentAnalyzer: any FoodAnalyzing { mlAnalyzer }
 
     // MARK: - Camera / Photo Picker
     @State private var showCamera = false
@@ -59,7 +50,6 @@ struct ScannerView: View {
         userProfiles.first?.firstName ?? "there"
     }
 
-    // Últimas lecturas de glucosa del día
     private var todayGlucoseEntries: [HealthLogEntry] {
         let start = Calendar.current.startOfDay(for: Date())
         return allEntries.filter { $0.kind == HealthLogEntry.kindGlucose && $0.timestamp >= start }
@@ -80,7 +70,6 @@ struct ScannerView: View {
         }
     }
 
-    // Azúcar total hoy
     private var todayTotalSugar: Double {
         let start = Calendar.current.startOfDay(for: Date())
         let todayEntries = allEntries.filter { $0.timestamp >= start }
@@ -91,12 +80,10 @@ struct ScannerView: View {
 
     private let dailySugarLimit: Double = 25
 
-    // Próximos recordatorios del día
     private var upcomingReminders: [ReminderConfig] {
         Array(reminders.prefix(3))
     }
 
-    // Daily insight estático basado en datos
     private var dailyInsight: String {
         if todayTotalSugar > dailySugarLimit {
             return "You've exceeded your sugar limit today. Consider a walk to help manage glucose levels."
@@ -165,7 +152,6 @@ struct ScannerView: View {
             Spacer()
 
             HStack(spacing: 10) {
-                // Notificaciones
                 Button { showReminders = true } label: {
                     Image(systemName: "bell.fill")
                         .font(.system(size: 15, weight: .semibold))
@@ -176,7 +162,6 @@ struct ScannerView: View {
                         .shadow(color: .black.opacity(0.07), radius: 4)
                 }
 
-                // Avatar
                 Button { showProfile = true } label: {
                     Group {
                         if let profile = userProfiles.first,
@@ -242,7 +227,6 @@ struct ScannerView: View {
                     .padding(.vertical, 8)
             }
 
-            // Barra sugar intake
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text("Sugar intake (Today)")
@@ -280,7 +264,6 @@ struct ScannerView: View {
 
     private var scanButton: some View {
         VStack(spacing: 10) {
-            // Scan Now (camera)
             Button { showCamera = true } label: {
                 HStack(spacing: 10) {
                     if isAnalyzing {
@@ -307,7 +290,6 @@ struct ScannerView: View {
             }
             .disabled(isAnalyzing)
 
-            // Choose from photos
             PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                 HStack(spacing: 8) {
                     Image(systemName: "photo.on.rectangle.angled")
@@ -333,26 +315,6 @@ struct ScannerView: View {
                     }
                 }
             }
-
-            // Analyzer pill
-            HStack(spacing: 4) {
-                Image(systemName: analyzerType.icon)
-                    .font(.caption2.weight(.semibold))
-                Picker("", selection: $analyzerType) {
-                    ForEach(AnalyzerType.allCases) { type in
-                        Text(type.shortName).tag(type)
-                    }
-                }
-                .pickerStyle(.menu)
-                .labelsHidden()
-            }
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(Color(hex: "1a7fc1"))
-            .padding(.horizontal, 14)
-            .padding(.vertical, 7)
-            .background(Color.white)
-            .clipShape(Capsule())
-            .shadow(color: .black.opacity(0.05), radius: 4)
 
             if let err = analysisError {
                 Text(err)
@@ -454,7 +416,7 @@ struct ScannerView: View {
         let nsError = error as NSError
         if nsError.domain == NSURLErrorDomain { return "No internet connection. Please try again." }
         if nsError.domain.contains("ML")      { return "Image couldn't be analyzed. Try another photo." }
-        return "Analysis failed with \(analyzerType.displayName). Please try again."
+        return "Analysis failed. Please try again."
     }
 }
 
@@ -463,10 +425,8 @@ struct ScannerView: View {
 private struct ReminderRowView: View {
     let reminder: ReminderConfig
 
-    // times es [String] en formato "HH:mm", tomamos el primero
     private var timeString: String {
         guard let first = reminder.times.first else { return "—" }
-        // Convertir "HH:mm" a formato 12h
         let parts = first.split(separator: ":").compactMap { Int($0) }
         guard parts.count == 2 else { return first }
         let hour = parts[0]
@@ -501,7 +461,6 @@ private struct ReminderRowView: View {
                 .frame(width: 1, height: 36)
 
             VStack(alignment: .leading, spacing: 2) {
-                // label es String? — usamos el type como fallback
                 Text(reminder.label ?? reminder.type.capitalized)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color(hex: "0d1b2a"))
@@ -522,10 +481,6 @@ private struct ReminderRowView: View {
         .padding(.vertical, 14)
     }
 }
-
-
-
-
 
 #Preview {
     ScannerView()
