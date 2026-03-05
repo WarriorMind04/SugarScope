@@ -141,7 +141,7 @@ struct MealAnalysisViewProtTwoo: View {
             macroGrid
             insightCard
             detectedFoodsSection
-            debugSection
+            
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
@@ -314,62 +314,7 @@ struct MealAnalysisViewProtTwoo: View {
         }
     }
 
-    // ⚠️ DEBUG — borra todo este bloque antes de publicar en App Store
-    private var debugSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("WATCH ALERT DEBUG")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(Color(hex: "64748b"))
-                .kerning(1.2)
-
-            VStack(spacing: 8) {
-                Button {
-                    UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
-                    SugarAlertManager.shared.evaluate(totalSugar: 30, dailyLimit: 25)
-                    print("🚨 Alerta exceeded forzada")
-                } label: {
-                    Label("Force: Limit Exceeded", systemImage: "exclamationmark.triangle.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.red.opacity(0.08))
-                        .foregroundStyle(.red)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-
-                Button {
-                    UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
-                    SugarAlertManager.shared.evaluate(totalSugar: 22, dailyLimit: 25)
-                    print("⚠️ Alerta warning forzada")
-                } label: {
-                    Label("Force: Almost at Limit", systemImage: "bolt.heart.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.orange.opacity(0.08))
-                        .foregroundStyle(.orange)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-
-                Button {
-                    UserDefaults.standard.removeObject(forKey: "sugarAlert_log")
-                    print("🧹 Cache limpiado")
-                } label: {
-                    Label("Reset Alert Cache", systemImage: "trash")
-                        .font(.system(size: 14, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.gray.opacity(0.08))
-                        .foregroundStyle(.secondary)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-            }
-            .padding(16)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
-        }
-    }
+    
 
     // MARK: - Log
 
