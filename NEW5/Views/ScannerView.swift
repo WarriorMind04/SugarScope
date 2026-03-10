@@ -123,7 +123,7 @@ struct ScannerView: View {
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showReminders) {
-                NavigationStack { RemindersView() }
+                NavigationStack { SettingsView() }
             }
             .fullScreenCover(isPresented: $showCamera) {
                 CameraPickerView { image in
@@ -153,11 +153,11 @@ struct ScannerView: View {
 
             HStack(spacing: 10) {
                 Button { showReminders = true } label: {
-                    Image(systemName: "bell.fill")
-                        .font(.system(size: 15, weight: .semibold))
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 30, weight: .semibold))
                         .foregroundStyle(Color(hex: "1a7fc1"))
                         .padding(10)
-                        .background(Color.white)
+                        //.background(Color.white)
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.07), radius: 4)
                 }
